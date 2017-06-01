@@ -43,6 +43,7 @@
             this.splitterRight = new System.Windows.Forms.Splitter();
             this.pbInimigo = new System.Windows.Forms.PictureBox();
             this.splitterTabuleiros = new System.Windows.Forms.Splitter();
+            this.btnVoltar = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pbTabuleiro)).BeginInit();
             this.tlpNavios.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbSubmarino)).BeginInit();
@@ -166,6 +167,7 @@
             // 
             // panelConectar
             // 
+            this.panelConectar.Controls.Add(this.btnVoltar);
             this.panelConectar.Controls.Add(this.btnConectar);
             this.panelConectar.Controls.Add(this.label1);
             this.panelConectar.Controls.Add(this.cbDisponiveis);
@@ -238,6 +240,16 @@
             this.splitterTabuleiros.TabStop = false;
             this.splitterTabuleiros.Visible = false;
             // 
+            // btnVoltar
+            // 
+            this.btnVoltar.Location = new System.Drawing.Point(6, 359);
+            this.btnVoltar.Name = "btnVoltar";
+            this.btnVoltar.Size = new System.Drawing.Size(75, 23);
+            this.btnVoltar.TabIndex = 3;
+            this.btnVoltar.Text = "Voltar";
+            this.btnVoltar.UseVisualStyleBackColor = true;
+            this.btnVoltar.Click += new System.EventHandler(this.btnVoltar_Click);
+            // 
             // FormTabuleiro
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -286,6 +298,7 @@
         private System.Windows.Forms.Button btnConectar;
         private System.Windows.Forms.PictureBox pbInimigo;
         private System.Windows.Forms.Splitter splitterTabuleiros;
+        private System.Windows.Forms.Button btnVoltar;
     }
 }
 

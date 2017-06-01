@@ -270,17 +270,29 @@ namespace BatalhaNaval_Visual
             }
         }
 
+        /// <summary>
+        /// Recebeu um tiro
+        /// </summary>
+        /// <param name="t">Tiro recebido</param>
         private void Cliente_OnTiroRecebido(Tiro t)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Recebeu o resultado de um tiro dado
+        /// </summary>
+        /// <param name="t">Tiro dado</param>
+        /// <param name="resultado">Resultado do tiro</param>
         private void Cliente_OnResultadoDeTiro(Tiro t, ResultadoDeTiro resultado)
         {
             throw new NotImplementedException();
         }
 
-        private Tiro Cliente_OnDarTiro()
+        /// <summary>
+        /// Sinaliza que deve-se dar um tiro
+        /// </summary>
+        private void Cliente_OnDarTiro()
         {
             throw new NotImplementedException();
         }
@@ -289,7 +301,7 @@ namespace BatalhaNaval_Visual
         /// Evento chamado quando o cliente antes conectado se desconecta
         /// </summary>
         /// <param name="addr">Endereço do cliente desconectado</param>
-        private void Cliente_OnClienteDesconectado(System.Net.IPAddress addr)
+        private void Cliente_OnClienteDesconectado(IPAddress addr)
         {
             tabuleiro = new Tabuleiro();
             pbTabuleiro.Invalidate();
@@ -302,7 +314,7 @@ namespace BatalhaNaval_Visual
         /// Evento chamado quando um cliente se conecta a este
         /// </summary>
         /// <param name="addr">Endereço do cliente conectado</param>
-        private void Cliente_OnClienteConectado(System.Net.IPAddress addr)
+        private void Cliente_OnClienteConectado(IPAddress addr)
         {
             panelConectar.Visible = false;
             splitterRight.Visible = false;
@@ -371,12 +383,18 @@ namespace BatalhaNaval_Visual
         private void btnConectar_Click(object sender, EventArgs e)
         {
             btnConectar.Enabled = false;
-
+            
             Task.Run(() =>
             {
                 Invoke(new Action(() => {
                     try
                     {
+                        if (cbDisponiveis.SelectedIndex < 0)
+                        {
+                            btnConectar.Enabled = true;
+                            return;
+                        }
+
                         MessageBox.Show(cbDisponiveis.SelectedItem.ToString());
                         if (!cliente.SolicitarConexao((IPAddress)cbDisponiveis.SelectedItem))
                         {
@@ -425,6 +443,21 @@ namespace BatalhaNaval_Visual
 
             CreateThumbnail(dragged ?? TipoDeNavio.Submarino);
             Cursor.Current = new Cursor(cursor);
+        }
+
+        private void btnVoltar_Click(object sender, EventArgs e)
+        {
+            cliente.Close();
+            cliente = null;
+
+            panelConectar.Visible = splitterRight.Visible = false;
+            tlpNavios.Visible = splitterLeft.Visible = true;
+
+            tabuleiro = new Tabuleiro();
+            pbTabuleiro.Invalidate();
+
+            foreach (TipoDeNavio t in (TipoDeNavio[])Enum.GetValues(typeof(TipoDeNavio)))
+                GetPictureBoxParaTipoDeNavio(t).Visible = true;
         }
     }
 }

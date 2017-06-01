@@ -134,6 +134,12 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\BatalhaNaval\BatalhaNaval\Protocolo.csproj">
+      <Project>{5ca5fc67-8e8b-47f9-b2bd-04eafa570c28}</Project>
+      <Name>Protocolo</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
