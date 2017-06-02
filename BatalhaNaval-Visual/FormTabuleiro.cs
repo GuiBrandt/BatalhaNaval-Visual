@@ -11,12 +11,14 @@ namespace BatalhaNaval_Visual
 {
     public partial class FormTabuleiro : Form
     {
-        ClienteP2P cliente;
-        Tabuleiro tabuleiro;
-        IntPtr cursor = IntPtr.Zero;
-        Bitmap thumb = null;
-        TipoDeNavio? dragged = null;
-        int direcao = 3;
+        ClienteP2P _cliente;
+        Tabuleiro _tabuleiro;
+        IntPtr _cursor = IntPtr.Zero;
+        Bitmap _thumb = null;
+        TipoDeNavio? _dragged = null;
+        int _dir = 3;
+        Dictionary<Tiro, ResultadoDeTiro> _tirosDados;
+        List<Tiro> _tirosRecebidos;
 
         /// <summary>
         /// Construtor
@@ -25,7 +27,9 @@ namespace BatalhaNaval_Visual
         {
             InitializeComponent();
 
-            tabuleiro = new Tabuleiro();
+            _tabuleiro = new Tabuleiro();
+            _tirosDados = new Dictionary<Tiro, ResultadoDeTiro>();
+            _tirosRecebidos = new List<Tiro>();
             pbTabuleiro.AllowDrop = true;
         }
 
@@ -70,11 +74,23 @@ namespace BatalhaNaval_Visual
                     bmp.RotateFlip(RotateFlipType.RotateNoneFlipX);
                     break;
                 case 2:
-                    bmp.RotateFlip(RotateFlipType.Rotate270FlipY);
+                    bmp.RotateFlip(RotateFlipType.Rotate270FlipNone);
                     break;
             }
 
-            return bmp;
+            Size size;
+            switch (d)
+            {
+                case 1:
+                case 3:
+                    size = new Size(pbTabuleiro.Width / 10 * t.Tamanho(), pbTabuleiro.Height / 10);
+                    break;
+                default:
+                    size = new Size(pbTabuleiro.Width / 10, pbTabuleiro.Height / 10 * t.Tamanho());
+                    break;
+            }
+
+            return new Bitmap(bmp, size);
         }
 
         /// <summary>
@@ -84,24 +100,23 @@ namespace BatalhaNaval_Visual
         {
             Graphics g = e.Graphics;
 
-            float wColuna = (float)pbTabuleiro.Width / tabuleiro.NumeroDeColunas,
-                hLinha = (float)pbTabuleiro.Height / tabuleiro.NumeroDeLinhas;
+            float wColuna = (float)pbTabuleiro.Width / _tabuleiro.NumeroDeColunas,
+                hLinha = (float)pbTabuleiro.Height / _tabuleiro.NumeroDeLinhas;
 
             using (Pen p = new Pen(Color.Black, 2))
             {
-                for (int i = 1; i < tabuleiro.NumeroDeLinhas; i++)
+                for (int i = 1; i < _tabuleiro.NumeroDeLinhas; i++)
                     g.DrawLine(p, 0, i * hLinha, pbTabuleiro.Width, i * hLinha);
 
-                for (int i = 1; i < tabuleiro.NumeroDeColunas; i++)
+                for (int i = 1; i < _tabuleiro.NumeroDeColunas; i++)
                     g.DrawLine(p, i * wColuna, 0, i * wColuna, pbTabuleiro.Height);
             }
 
-            foreach (KeyValuePair<int[], TipoDeNavio> navio in tabuleiro.Navios)
+            foreach (KeyValuePair<int[], TipoDeNavio> navio in _tabuleiro.Navios)
             {
                 int d = navio.Key[2];
 
                 PointF pos;
-                SizeF size;
 
                 switch (d)
                 {                        
@@ -116,19 +131,8 @@ namespace BatalhaNaval_Visual
                         break;
                 }
 
-                switch (d)
-                {
-                    case 1:
-                    case 3:
-                        size = new SizeF(wColuna * navio.Value.Tamanho(), hLinha);
-                        break;
-                    default:
-                        size = new SizeF(wColuna, hLinha * navio.Value.Tamanho());
-                        break;
-                }
-
                 Image img = GetImagemParaTipoDeNavio(navio.Value, d);
-                g.DrawImage(img, new RectangleF(pos, size));
+                g.DrawImage(img, pos);
             }
         }
 
@@ -159,8 +163,8 @@ namespace BatalhaNaval_Visual
             PictureBox pb = (PictureBox)sender;
             
             Bitmap bmp = (Bitmap)pb.Image;
-            dragged = (TipoDeNavio)Enum.Parse(typeof(TipoDeNavio), (string)pb.Tag);
-            CreateThumbnail(dragged ?? TipoDeNavio.Submarino);
+            _dragged = (TipoDeNavio)Enum.Parse(typeof(TipoDeNavio), (string)pb.Tag);
+            CreateThumbnail(_dragged ?? TipoDeNavio.Submarino);
 
             DoDragDrop((string)pb.Tag, DragDropEffects.All);
         }
@@ -171,34 +175,39 @@ namespace BatalhaNaval_Visual
         /// <param name="bmp">Bitmap para a imagem do cursor</param>
         void CreateThumbnail(TipoDeNavio t)
         {
-            thumb = (Bitmap)GetImagemParaTipoDeNavio(t, direcao);
+            _thumb = (Bitmap)GetImagemParaTipoDeNavio(t, _dir);
 
-            IntPtr ptr = thumb.GetHicon();
+            IntPtr ptr = _thumb.GetHicon();
             IconInfo tmp = new IconInfo();
             GetIconInfo(ptr, ref tmp);
             tmp.xHotspot = 0;
             tmp.yHotspot = 0;
 
-            if (direcao == 1)
+            if (_dir == 1)
             {
-                tmp.xHotspot = thumb.Width;
-                tmp.yHotspot = 0;
+                tmp.xHotspot = _thumb.Width;
+                tmp.yHotspot = _thumb.Height / 2;
             }
-            else if (direcao == 2)
+            else if (_dir == 2)
+            {
+                tmp.xHotspot = _thumb.Width / 2;
+                tmp.yHotspot = _thumb.Height;
+            }
+            else if (_dir == 3)
             {
                 tmp.xHotspot = 0;
-                tmp.yHotspot = thumb.Height;
+                tmp.yHotspot = _thumb.Height / 2;
             }
-            else
+            else if (_dir == 0)
             {
-                tmp.xHotspot = 0;
+                tmp.xHotspot = _thumb.Width / 2;
                 tmp.yHotspot = 0;
             }
 
             tmp.fIcon = false;
             ptr = CreateIconIndirect(ref tmp);
             
-            cursor = ptr;
+            _cursor = ptr;
         }
 
         /// <summary>
@@ -206,27 +215,27 @@ namespace BatalhaNaval_Visual
         /// </summary>
         private void pbTabuleiro_DragDrop(object sender, DragEventArgs e)
         {
-            TipoDeNavio tipoDeNavio = dragged ?? TipoDeNavio.Submarino;
+            TipoDeNavio tipoDeNavio = _dragged ?? TipoDeNavio.Submarino;
 
             Point p = pbTabuleiro.PointToClient(new Point(e.X, e.Y));
-            int x = p.X * tabuleiro.NumeroDeColunas / pbTabuleiro.Width;
-            int y = p.Y * tabuleiro.NumeroDeLinhas / pbTabuleiro.Height;
+            int x = p.X * _tabuleiro.NumeroDeColunas / pbTabuleiro.Width;
+            int y = p.Y * _tabuleiro.NumeroDeLinhas / pbTabuleiro.Height;
 
             try
             {
-                tabuleiro.PosicionarNavio(tipoDeNavio, x, y, direcao);
+                _tabuleiro.PosicionarNavio(tipoDeNavio, x, y, _dir);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(this, ex.Message, "Eita nóis", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
 
-            if (tabuleiro.Contar(tipoDeNavio) == tipoDeNavio.Limite())
+            if (_tabuleiro.Contar(tipoDeNavio) == tipoDeNavio.Limite())
                 GetPictureBoxParaTipoDeNavio(tipoDeNavio).Visible = false;
 
             pbTabuleiro.Invalidate();
 
-            if (tabuleiro.EstaCompleto())
+            if (_tabuleiro.EstaCompleto())
             {
                 DialogResult r = MessageBox.Show(this, "Tabuleiro completo, continuar?", "Batalha Naval", MessageBoxButtons.YesNo);
 
@@ -240,15 +249,15 @@ namespace BatalhaNaval_Visual
 
                     if (r == DialogResult.OK)
                     {
-                        cliente = new ClienteP2P(login.User, tabuleiro);
-                        cliente.OnClienteDisponivel += Cliente_OnClienteDisponivel;
-                        cliente.OnClienteRequisitandoConexao += Cliente_OnClienteRequisitandoConexao;
-                        cliente.OnClienteConectado += Cliente_OnClienteConectado;
-                        cliente.OnClienteDesconectado += Cliente_OnClienteDesconectado;
-                        cliente.OnDarTiro += Cliente_OnDarTiro;
-                        cliente.OnResultadoDeTiro += Cliente_OnResultadoDeTiro;
-                        cliente.OnTiroRecebido += Cliente_OnTiroRecebido;
-                        cliente.Iniciar();
+                        _cliente = new ClienteP2P(login.User, _tabuleiro);
+                        _cliente.OnClienteDisponivel += Cliente_OnClienteDisponivel;
+                        _cliente.OnClienteRequisitandoConexao += Cliente_OnClienteRequisitandoConexao;
+                        _cliente.OnClienteConectado += Cliente_OnClienteConectado;
+                        _cliente.OnClienteDesconectado += Cliente_OnClienteDesconectado;
+                        _cliente.OnDarTiro += Cliente_OnDarTiro;
+                        _cliente.OnResultadoDeTiro += Cliente_OnResultadoDeTiro;
+                        _cliente.OnTiroRecebido += Cliente_OnTiroRecebido;
+                        _cliente.Iniciar();
 
                         panelConectar.Visible = true;
                         splitterRight.Visible = true;
@@ -262,7 +271,7 @@ namespace BatalhaNaval_Visual
                     }
                 }
 
-                tabuleiro = new Tabuleiro();
+                _tabuleiro = new Tabuleiro();
                 pbTabuleiro.Invalidate();
 
                 foreach (TipoDeNavio t in (TipoDeNavio[])Enum.GetValues(typeof(TipoDeNavio)))
@@ -276,7 +285,7 @@ namespace BatalhaNaval_Visual
         /// <param name="t">Tiro recebido</param>
         private void Cliente_OnTiroRecebido(Tiro t)
         {
-            throw new NotImplementedException();
+            _tirosRecebidos.Add(t);
         }
 
         /// <summary>
@@ -286,7 +295,7 @@ namespace BatalhaNaval_Visual
         /// <param name="resultado">Resultado do tiro</param>
         private void Cliente_OnResultadoDeTiro(Tiro t, ResultadoDeTiro resultado)
         {
-            throw new NotImplementedException();
+            _tirosDados.Add(t, resultado);
         }
 
         /// <summary>
@@ -303,11 +312,11 @@ namespace BatalhaNaval_Visual
         /// <param name="addr">Endereço do cliente desconectado</param>
         private void Cliente_OnClienteDesconectado(IPAddress addr)
         {
-            tabuleiro = new Tabuleiro();
+            _tabuleiro = new Tabuleiro();
             pbTabuleiro.Invalidate();
 
             tlpNavios.Visible = true;
-            cliente = null;
+            _cliente = null;
         }
 
         /// <summary>
@@ -329,7 +338,7 @@ namespace BatalhaNaval_Visual
         /// <returns>True se deve aceitar a conexão e falso se não</returns>
         private bool Cliente_OnClienteRequisitandoConexao(System.Net.IPAddress addr)
         {
-            DialogResult r = MessageBox.Show(this, string.Format("{0} ({1}) quer jogar com você. Aceitar?", cliente.NomeRemoto, addr), "Batalha Naval", MessageBoxButtons.YesNo);
+            DialogResult r = MessageBox.Show(this, string.Format("{0} ({1}) quer jogar com você. Aceitar?", _cliente.NomeRemoto, addr), "Batalha Naval", MessageBoxButtons.YesNo);
 
             if (r == DialogResult.Yes)
                 return true;
@@ -354,10 +363,10 @@ namespace BatalhaNaval_Visual
         /// </summary>
         private void Form_GiveFeedback(object sender, GiveFeedbackEventArgs e)
         {
-            if (cursor == IntPtr.Zero) return;
+            if (_cursor == IntPtr.Zero) return;
 
             e.UseDefaultCursors = false;
-            Cursor.Current = new Cursor(cursor);
+            Cursor.Current = new Cursor(_cursor);
         }
 
         /// <summary>
@@ -374,7 +383,7 @@ namespace BatalhaNaval_Visual
         /// </summary>
         private void Form_MouseUp(object sender, MouseEventArgs e)
         {
-            cursor = IntPtr.Zero;
+            _cursor = IntPtr.Zero;
         }
 
         /// <summary>
@@ -396,7 +405,7 @@ namespace BatalhaNaval_Visual
                         }
 
                         MessageBox.Show(cbDisponiveis.SelectedItem.ToString());
-                        if (!cliente.SolicitarConexao((IPAddress)cbDisponiveis.SelectedItem))
+                        if (!_cliente.SolicitarConexao((IPAddress)cbDisponiveis.SelectedItem))
                         {
                             MessageBox.Show(this, "O cliente remoto recusou a conexão =(", "Batalha Naval", MessageBoxButtons.OK);
                             btnConectar.Enabled = true;
@@ -420,44 +429,93 @@ namespace BatalhaNaval_Visual
             switch (e.KeyCode)
             {
                 case Keys.Left:
-                    direcao = 1;
+                    _dir = 1;
                     break;
 
                 case Keys.Right:
-                    direcao = 3;
+                    _dir = 3;
                     break;
 
                 case Keys.Up:
-                    direcao = 2;
+                    _dir = 2;
                     break;
 
                 case Keys.Down:
-                    direcao = 0;
+                    _dir = 0;
                     break;
             }
 
             tlpNavios.Refresh();
 
-            if (cursor == IntPtr.Zero || thumb == null)
+            if (_cursor == IntPtr.Zero || _thumb == null)
                 return;
 
-            CreateThumbnail(dragged ?? TipoDeNavio.Submarino);
-            Cursor.Current = new Cursor(cursor);
+            CreateThumbnail(_dragged ?? TipoDeNavio.Submarino);
+            Cursor.Current = new Cursor(_cursor);
         }
 
+        /// <summary>
+        /// Cancela a operação de conexão e volta para a criação do tabuleiro
+        /// </summary>
         private void btnVoltar_Click(object sender, EventArgs e)
         {
-            cliente.Close();
-            cliente = null;
+            _cliente.Close();
+            _cliente = null;
 
             panelConectar.Visible = splitterRight.Visible = false;
             tlpNavios.Visible = splitterLeft.Visible = true;
 
-            tabuleiro = new Tabuleiro();
+            _tabuleiro = new Tabuleiro();
             pbTabuleiro.Invalidate();
 
             foreach (TipoDeNavio t in (TipoDeNavio[])Enum.GetValues(typeof(TipoDeNavio)))
                 GetPictureBoxParaTipoDeNavio(t).Visible = true;
+        }
+
+        /// <summary>
+        /// Limpa o tabuleiro
+        /// </summary>
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            _tabuleiro = new Tabuleiro();
+            pbTabuleiro.Invalidate();
+
+            foreach (TipoDeNavio t in (TipoDeNavio[])Enum.GetValues(typeof(TipoDeNavio)))
+                GetPictureBoxParaTipoDeNavio(t).Visible = true;
+        }
+
+        /// <summary>
+        /// Redesenha o tabuleiro do inimigo quando o mouse se move sobre ele
+        /// </summary>
+        private void pbInimigo_MouseMove(object sender, MouseEventArgs e)
+        {
+            pbInimigo.Invalidate();
+        }
+
+        /// <summary>
+        /// Evento de desenho do tabuleiro inimigo
+        /// </summary>
+        private void pbInimigo_Paint(object sender, PaintEventArgs e)
+        {
+            Image cursor = new Bitmap(Properties.Resources.cursor, new Size(pbInimigo.Width / 10, pbInimigo.Height / 10));
+            Image hit = new Bitmap(Properties.Resources.acerto, new Size(pbInimigo.Width / 10, pbInimigo.Height / 10));
+            Image miss = new Bitmap(Properties.Resources.agua, new Size(pbInimigo.Width / 10, pbInimigo.Height / 10));
+            
+            foreach (KeyValuePair<Tiro, ResultadoDeTiro> pair in _tirosDados)
+            {
+                PointF pos = new PointF(pair.Key.X * pbTabuleiro.Width / 10, pair.Key.Y * pbTabuleiro.Height / 10);
+
+                if (pair.Value.HasFlag(ResultadoDeTiro.Acertou))
+                    e.Graphics.DrawImage(hit, pos);
+                else
+                    e.Graphics.DrawImage(miss, pos);
+            }
+
+            Point p = pbInimigo.PointToClient(Cursor.Position);
+            int x = p.X * _tabuleiro.NumeroDeColunas / pbTabuleiro.Width;
+            int y = p.Y * _tabuleiro.NumeroDeLinhas / pbTabuleiro.Height;
+
+            e.Graphics.DrawImage(cursor, new PointF(x * pbTabuleiro.Width / 10, y * pbTabuleiro.Height / 10));
         }
     }
 }
