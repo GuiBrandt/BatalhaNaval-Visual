@@ -38,7 +38,6 @@
             this.btnClear = new System.Windows.Forms.Button();
             this.splitterLeft = new System.Windows.Forms.Splitter();
             this.panelConectar = new System.Windows.Forms.Panel();
-            this.btnVoltar = new System.Windows.Forms.Button();
             this.btnConectar = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.cbDisponiveis = new System.Windows.Forms.ComboBox();
@@ -166,7 +165,6 @@
             // 
             // panelConectar
             // 
-            this.panelConectar.Controls.Add(this.btnVoltar);
             this.panelConectar.Controls.Add(this.btnConectar);
             this.panelConectar.Controls.Add(this.label1);
             this.panelConectar.Controls.Add(this.cbDisponiveis);
@@ -176,17 +174,6 @@
             this.panelConectar.Size = new System.Drawing.Size(166, 480);
             this.panelConectar.TabIndex = 8;
             this.panelConectar.Visible = false;
-            // 
-            // btnVoltar
-            // 
-            this.btnVoltar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnVoltar.Location = new System.Drawing.Point(3, 454);
-            this.btnVoltar.Name = "btnVoltar";
-            this.btnVoltar.Size = new System.Drawing.Size(75, 23);
-            this.btnVoltar.TabIndex = 3;
-            this.btnVoltar.Text = "Voltar";
-            this.btnVoltar.UseVisualStyleBackColor = true;
-            this.btnVoltar.Click += new System.EventHandler(this.btnVoltar_Click);
             // 
             // btnConectar
             // 
@@ -316,7 +303,6 @@
         private System.Windows.Forms.Button btnConectar;
         private System.Windows.Forms.PictureBox pbInimigo;
         private System.Windows.Forms.Splitter splitterTabuleiros;
-        private System.Windows.Forms.Button btnVoltar;
         private System.Windows.Forms.Button btnClear;
     }
 }

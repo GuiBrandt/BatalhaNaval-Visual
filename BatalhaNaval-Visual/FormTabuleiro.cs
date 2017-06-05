@@ -119,7 +119,7 @@ namespace BatalhaNaval_Visual
                 PointF pos;
 
                 switch (d)
-                {                        
+                {
                     case 1:
                         pos = new PointF(wColuna * (navio.Key[0] + 1 - navio.Value.Tamanho()), hLinha * navio.Key[1]);
                         break;
@@ -161,7 +161,7 @@ namespace BatalhaNaval_Visual
         private void pbNavio_MouseDown(object sender, MouseEventArgs e)
         {
             PictureBox pb = (PictureBox)sender;
-            
+
             Bitmap bmp = (Bitmap)pb.Image;
             _dragged = (TipoDeNavio)Enum.Parse(typeof(TipoDeNavio), (string)pb.Tag);
             CreateThumbnail(_dragged ?? TipoDeNavio.Submarino);
@@ -206,7 +206,7 @@ namespace BatalhaNaval_Visual
 
             tmp.fIcon = false;
             ptr = CreateIconIndirect(ref tmp);
-            
+
             _cursor = ptr;
         }
 
@@ -325,10 +325,13 @@ namespace BatalhaNaval_Visual
         /// <param name="addr">Endereço do cliente conectado</param>
         private void Cliente_OnClienteConectado(IPAddress addr)
         {
-            panelConectar.Visible = false;
-            splitterRight.Visible = false;
-            splitterTabuleiros.Visible = true;
-            pbInimigo.Visible = true;
+            Invoke(new Action(() =>
+            {
+                panelConectar.Visible = false;
+                splitterRight.Visible = false;
+                splitterTabuleiros.Visible = true;
+                pbInimigo.Visible = true;
+            }));
         }
 
         /// <summary>
@@ -336,9 +339,12 @@ namespace BatalhaNaval_Visual
         /// </summary>
         /// <param name="addr">Endereço do cliente</param>
         /// <returns>True se deve aceitar a conexão e falso se não</returns>
-        private bool Cliente_OnClienteRequisitandoConexao(System.Net.IPAddress addr)
+        private bool Cliente_OnClienteRequisitandoConexao(IPAddress addr)
         {
-            DialogResult r = MessageBox.Show(this, string.Format("{0} ({1}) quer jogar com você. Aceitar?", _cliente.NomeRemoto, addr), "Batalha Naval", MessageBoxButtons.YesNo);
+            DialogResult r = DialogResult.No;
+            Invoke(new Action(() => { 
+                r = MessageBox.Show(this, string.Format("{0} ({1}) quer jogar com você. Aceitar?", _cliente.NomeRemoto, addr), "Batalha Naval", MessageBoxButtons.YesNo); 
+            }));
 
             if (r == DialogResult.Yes)
                 return true;
@@ -393,31 +399,47 @@ namespace BatalhaNaval_Visual
         {
             btnConectar.Enabled = false;
             
+            if (cbDisponiveis.SelectedIndex < 0)
+            {
+                btnConectar.Enabled = true;
+                return;
+            }
+
+            
+            IPAddress addr;
+
+            try
+            {
+                addr = (IPAddress)cbDisponiveis.SelectedItem;
+            }
+            catch
+            {
+                MessageBox.Show(this, "Endereço inválido", "Batalha Naval", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             Task.Run(() =>
             {
-                Invoke(new Action(() => {
-                    try
+                try
+                {
+                    if (!_cliente.SolicitarConexao(addr))
                     {
-                        if (cbDisponiveis.SelectedIndex < 0)
-                        {
-                            btnConectar.Enabled = true;
-                            return;
-                        }
-
-                        MessageBox.Show(cbDisponiveis.SelectedItem.ToString());
-                        if (!_cliente.SolicitarConexao((IPAddress)cbDisponiveis.SelectedItem))
+                        Invoke(new Action(() =>
                         {
                             MessageBox.Show(this, "O cliente remoto recusou a conexão =(", "Batalha Naval", MessageBoxButtons.OK);
                             btnConectar.Enabled = true;
-                        }
+                        }));
                     }
-                    catch (Exception ex)
+                }
+                catch (Exception ex)
+                {
+                    Invoke(new Action(() =>
                     {
                         MessageBox.Show(this, "Não foi possível conectar ao cliente remoto. Tento novamente mais tarde.\r\n" + ex.Message, "Batalha Naval", MessageBoxButtons.OK);
                         cbDisponiveis.Items.RemoveAt(cbDisponiveis.SelectedIndex);
                         btnConectar.Enabled = true;
-                    }
-                }));
+                    }));
+                }
             });
         }
 
@@ -503,7 +525,7 @@ namespace BatalhaNaval_Visual
             
             foreach (KeyValuePair<Tiro, ResultadoDeTiro> pair in _tirosDados)
             {
-                PointF pos = new PointF(pair.Key.X * pbTabuleiro.Width / 10, pair.Key.Y * pbTabuleiro.Height / 10);
+                PointF pos = new PointF(pair.Key.X * pbInimigo.Width / 10, pair.Key.Y * pbInimigo.Height / 10);
 
                 if (pair.Value.HasFlag(ResultadoDeTiro.Acertou))
                     e.Graphics.DrawImage(hit, pos);
@@ -512,10 +534,10 @@ namespace BatalhaNaval_Visual
             }
 
             Point p = pbInimigo.PointToClient(Cursor.Position);
-            int x = p.X * _tabuleiro.NumeroDeColunas / pbTabuleiro.Width;
-            int y = p.Y * _tabuleiro.NumeroDeLinhas / pbTabuleiro.Height;
+            int x = p.X * _tabuleiro.NumeroDeColunas / pbInimigo.Width;
+            int y = p.Y * _tabuleiro.NumeroDeLinhas / pbInimigo.Height;
 
-            e.Graphics.DrawImage(cursor, new PointF(x * pbTabuleiro.Width / 10, y * pbTabuleiro.Height / 10));
+            e.Graphics.DrawImage(cursor, new PointF(x * pbInimigo.Width / 10, y * pbInimigo.Height / 10));
         }
     }
 }
