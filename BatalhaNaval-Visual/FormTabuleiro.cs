@@ -241,6 +241,7 @@ namespace BatalhaNaval_Visual
 
                 if (r == DialogResult.Yes)
                 {
+                    Width -= tlpNavios.Width;
                     tlpNavios.Visible = false;
                     splitterLeft.Visible = false;
 
@@ -260,12 +261,14 @@ namespace BatalhaNaval_Visual
                         _cliente.Iniciar();
 
                         panelConectar.Visible = true;
+                        Width += panelConectar.Width;
                         splitterRight.Visible = true;
 
                         return;
                     }
                     else
                     {
+                        Width += tlpNavios.Width;
                         tlpNavios.Visible = true;
                         splitterLeft.Visible = true;
                     }
@@ -285,6 +288,7 @@ namespace BatalhaNaval_Visual
         /// <param name="t">Tiro recebido</param>
         private void Cliente_OnTiroRecebido(Tiro t)
         {
+            MessageBox.Show("Tiro recebido em " + t.X + " " + t.Y);
             _tirosRecebidos.Add(t);
         }
 
@@ -295,6 +299,7 @@ namespace BatalhaNaval_Visual
         /// <param name="resultado">Resultado do tiro</param>
         private void Cliente_OnResultadoDeTiro(Tiro t, ResultadoDeTiro resultado)
         {
+            MessageBox.Show("Resultado: " + resultado);
             _tirosDados.Add(t, resultado);
         }
 
@@ -303,7 +308,8 @@ namespace BatalhaNaval_Visual
         /// </summary>
         private void Cliente_OnDarTiro()
         {
-            throw new NotImplementedException();
+            pbInimigo.Enabled = true;
+            timeout.Start();
         }
 
         /// <summary>
@@ -314,6 +320,8 @@ namespace BatalhaNaval_Visual
         {
             _tabuleiro = new Tabuleiro();
             pbTabuleiro.Invalidate();
+
+            pbInimigo.Visible = splitterTabuleiros.Visible = false;
 
             tlpNavios.Visible = true;
             _cliente = null;
@@ -327,6 +335,7 @@ namespace BatalhaNaval_Visual
         {
             Invoke(new Action(() =>
             {
+                Width -= panelConectar.Width;
                 panelConectar.Visible = false;
                 splitterRight.Visible = false;
                 splitterTabuleiros.Visible = true;
@@ -404,7 +413,6 @@ namespace BatalhaNaval_Visual
                 btnConectar.Enabled = true;
                 return;
             }
-
             
             IPAddress addr;
 
@@ -533,11 +541,37 @@ namespace BatalhaNaval_Visual
                     e.Graphics.DrawImage(miss, pos);
             }
 
+            if (!pbInimigo.Enabled)
+                return; 
+
             Point p = pbInimigo.PointToClient(Cursor.Position);
             int x = p.X * _tabuleiro.NumeroDeColunas / pbInimigo.Width;
             int y = p.Y * _tabuleiro.NumeroDeLinhas / pbInimigo.Height;
 
             e.Graphics.DrawImage(cursor, new PointF(x * pbInimigo.Width / 10, y * pbInimigo.Height / 10));
+        }
+
+        /// <summary>
+        /// Timeout do tiro
+        /// </summary>
+        private void timeout_Tick(object sender, EventArgs e)
+        {
+            pbInimigo.Enabled = false;
+        }
+
+        /// <summary>
+        /// Clique na picturebox do inimigo
+        /// </summary>
+        private void pbInimigo_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (!pbInimigo.Enabled) return;
+
+            Point p = pbInimigo.PointToClient(new Point(e.X, e.Y));
+            int x = p.X * _tabuleiro.NumeroDeColunas / pbInimigo.Width;
+            int y = p.Y * _tabuleiro.NumeroDeLinhas / pbInimigo.Height;
+
+            _cliente.DarTiro(x, y);
+            pbInimigo.Enabled = false;
         }
     }
 }

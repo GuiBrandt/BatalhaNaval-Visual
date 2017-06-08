@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormTabuleiro));
             this.tlpNavios = new System.Windows.Forms.TableLayoutPanel();
             this.pbSubmarino = new System.Windows.Forms.PictureBox();
@@ -45,6 +46,7 @@
             this.splitterTabuleiros = new System.Windows.Forms.Splitter();
             this.pbTabuleiro = new System.Windows.Forms.PictureBox();
             this.pbInimigo = new System.Windows.Forms.PictureBox();
+            this.timeout = new System.Windows.Forms.Timer(this.components);
             this.tlpNavios.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbSubmarino)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbDestroier)).BeginInit();
@@ -200,6 +202,7 @@
             this.cbDisponiveis.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbDisponiveis.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbDisponiveis.Location = new System.Drawing.Point(78, 12);
             this.cbDisponiveis.Name = "cbDisponiveis";
             this.cbDisponiveis.Size = new System.Drawing.Size(76, 21);
@@ -239,7 +242,6 @@
             this.pbTabuleiro.DragDrop += new System.Windows.Forms.DragEventHandler(this.pbTabuleiro_DragDrop);
             this.pbTabuleiro.DragEnter += new System.Windows.Forms.DragEventHandler(this.pbTabuleiro_DragEnter);
             this.pbTabuleiro.Paint += new System.Windows.Forms.PaintEventHandler(this.pbTabuleiro_Paint);
-            this.pbTabuleiro.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.pbTabuleiro_PreviewKeyDown);
             // 
             // pbInimigo
             // 
@@ -253,7 +255,13 @@
             this.pbInimigo.TabStop = false;
             this.pbInimigo.Visible = false;
             this.pbInimigo.Paint += new System.Windows.Forms.PaintEventHandler(this.pbInimigo_Paint);
+            this.pbInimigo.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pbInimigo_MouseClick);
             this.pbInimigo.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pbInimigo_MouseMove);
+            // 
+            // timeout
+            // 
+            this.timeout.Interval = 30000;
+            this.timeout.Tick += new System.EventHandler(this.timeout_Tick);
             // 
             // FormTabuleiro
             // 
@@ -304,6 +312,7 @@
         private System.Windows.Forms.PictureBox pbInimigo;
         private System.Windows.Forms.Splitter splitterTabuleiros;
         private System.Windows.Forms.Button btnClear;
+        private System.Windows.Forms.Timer timeout;
     }
 }
 

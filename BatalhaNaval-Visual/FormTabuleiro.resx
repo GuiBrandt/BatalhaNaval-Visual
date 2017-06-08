@@ -121,7 +121,7 @@
   <data name="pbPortaAvioes.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAPAAAABSCAYAAABqgVl3AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
-        YQUAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAAHdElNRQfhBgEXMjoUJch0AACINElEQVR4Xu29BbRt2XUd
+        YQUAAAAJcEhZcwAACxAAAAsQAa0jvXUAAAAHdElNRQfhBgEXMjoUJch0AACINElEQVR4Xu29BbRt2XUd
         qFapQPXr83/MzMzMzMzMzMz83n/vM1MxSFUqSSWy5MSO3bZkB0aUdhQFlHanY4ftgN3pduy2Vs+5zj3f
         t55+gRxJsdP/jrHGgXtwnz3Xmmvtvdf+zNPf09/T39Pf099fn99nIc9APvczEF6H1/tfIE9/T39Pfz/H
         H0H2POQcxBHi8TMQV4gt5ASEYH76e/p7+vs5/GglX4S4Ojs7N0ZGRt6KiIh4QAkPD//Q0lynhIaGPl43
@@ -706,4 +706,7 @@
         5ycAAAAASUVORK5CYII=
 </value>
   </data>
+  <metadata name="timeout.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
 </root>
