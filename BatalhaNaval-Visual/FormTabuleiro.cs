@@ -223,7 +223,7 @@ namespace BatalhaNaval_Visual
 
             try
             {
-                _tabuleiro.PosicionarNavio(tipoDeNavio, x, y, _dir);
+                _tabuleiro.PosicionarNavio(tipoDeNavio, x, y, (Direcao)_dir);
             }
             catch (Exception ex)
             {
@@ -252,6 +252,7 @@ namespace BatalhaNaval_Visual
                     {
                         _cliente = new ClienteP2P(login.User, _tabuleiro);
                         _cliente.OnClienteDisponivel += Cliente_OnClienteDisponivel;
+                        _cliente.OnClienteIndisponivel += _cliente_OnClienteIndisponivel;
                         _cliente.OnClienteRequisitandoConexao += Cliente_OnClienteRequisitandoConexao;
                         _cliente.OnClienteConectado += Cliente_OnClienteConectado;
                         _cliente.OnClienteDesconectado += Cliente_OnClienteDesconectado;
@@ -280,6 +281,14 @@ namespace BatalhaNaval_Visual
                 foreach (TipoDeNavio t in (TipoDeNavio[])Enum.GetValues(typeof(TipoDeNavio)))
                     GetPictureBoxParaTipoDeNavio(t).Visible = true;
             }
+        }
+
+        private void _cliente_OnClienteIndisponivel(IPAddress addr)
+        {
+            Invoke(new Action(() =>
+            {
+                cbDisponiveis.Items.Remove(addr);
+            }));
         }
 
         /// <summary>

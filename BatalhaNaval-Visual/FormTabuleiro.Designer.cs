@@ -171,16 +171,16 @@
             this.panelConectar.Controls.Add(this.label1);
             this.panelConectar.Controls.Add(this.cbDisponiveis);
             this.panelConectar.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panelConectar.Location = new System.Drawing.Point(584, 0);
+            this.panelConectar.Location = new System.Drawing.Point(558, 0);
             this.panelConectar.Name = "panelConectar";
-            this.panelConectar.Size = new System.Drawing.Size(166, 480);
+            this.panelConectar.Size = new System.Drawing.Size(192, 480);
             this.panelConectar.TabIndex = 8;
             this.panelConectar.Visible = false;
             // 
             // btnConectar
             // 
             this.btnConectar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnConectar.Location = new System.Drawing.Point(78, 39);
+            this.btnConectar.Location = new System.Drawing.Point(104, 39);
             this.btnConectar.Name = "btnConectar";
             this.btnConectar.Size = new System.Drawing.Size(75, 23);
             this.btnConectar.TabIndex = 2;
@@ -205,13 +205,13 @@
             this.cbDisponiveis.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbDisponiveis.Location = new System.Drawing.Point(78, 12);
             this.cbDisponiveis.Name = "cbDisponiveis";
-            this.cbDisponiveis.Size = new System.Drawing.Size(76, 21);
+            this.cbDisponiveis.Size = new System.Drawing.Size(102, 21);
             this.cbDisponiveis.TabIndex = 0;
             // 
             // splitterRight
             // 
             this.splitterRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.splitterRight.Location = new System.Drawing.Point(581, 0);
+            this.splitterRight.Location = new System.Drawing.Point(555, 0);
             this.splitterRight.Name = "splitterRight";
             this.splitterRight.Size = new System.Drawing.Size(3, 480);
             this.splitterRight.TabIndex = 9;
@@ -223,7 +223,7 @@
             this.splitterTabuleiros.Dock = System.Windows.Forms.DockStyle.Top;
             this.splitterTabuleiros.Location = new System.Drawing.Point(267, 241);
             this.splitterTabuleiros.Name = "splitterTabuleiros";
-            this.splitterTabuleiros.Size = new System.Drawing.Size(314, 3);
+            this.splitterTabuleiros.Size = new System.Drawing.Size(288, 3);
             this.splitterTabuleiros.TabIndex = 11;
             this.splitterTabuleiros.TabStop = false;
             this.splitterTabuleiros.Visible = false;
@@ -236,7 +236,7 @@
             this.pbTabuleiro.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pbTabuleiro.Location = new System.Drawing.Point(267, 241);
             this.pbTabuleiro.Name = "pbTabuleiro";
-            this.pbTabuleiro.Size = new System.Drawing.Size(314, 239);
+            this.pbTabuleiro.Size = new System.Drawing.Size(288, 239);
             this.pbTabuleiro.TabIndex = 0;
             this.pbTabuleiro.TabStop = false;
             this.pbTabuleiro.DragDrop += new System.Windows.Forms.DragEventHandler(this.pbTabuleiro_DragDrop);
@@ -246,10 +246,11 @@
             // pbInimigo
             // 
             this.pbInimigo.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pbInimigo.Enabled = false;
             this.pbInimigo.Image = global::BatalhaNaval_Visual.Properties.Resources.ocean;
             this.pbInimigo.Location = new System.Drawing.Point(267, 0);
             this.pbInimigo.Name = "pbInimigo";
-            this.pbInimigo.Size = new System.Drawing.Size(314, 241);
+            this.pbInimigo.Size = new System.Drawing.Size(288, 241);
             this.pbInimigo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pbInimigo.TabIndex = 10;
             this.pbInimigo.TabStop = false;
