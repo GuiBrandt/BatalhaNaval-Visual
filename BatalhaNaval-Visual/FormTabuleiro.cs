@@ -252,7 +252,7 @@ namespace BatalhaNaval_Visual
                     {
                         _cliente = new ClienteP2P(login.User, _tabuleiro);
                         _cliente.OnClienteDisponivel += Cliente_OnClienteDisponivel;
-                        _cliente.OnClienteIndisponivel += _cliente_OnClienteIndisponivel;
+                        _cliente.OnClienteIndisponivel += Cliente_OnClienteIndisponivel;
                         _cliente.OnClienteRequisitandoConexao += Cliente_OnClienteRequisitandoConexao;
                         _cliente.OnClienteConectado += Cliente_OnClienteConectado;
                         _cliente.OnClienteDesconectado += Cliente_OnClienteDesconectado;
@@ -283,11 +283,19 @@ namespace BatalhaNaval_Visual
             }
         }
 
-        private void _cliente_OnClienteIndisponivel(IPAddress addr)
+        /// <summary>
+        /// Evento de sinalização de quando um cliente sai da rede
+        /// </summary>
+        /// <param name="addr">Endereço do cliente que desconectou</param>
+        private void Cliente_OnClienteIndisponivel(IPAddress addr)
         {
             Invoke(new Action(() =>
             {
-                cbDisponiveis.Items.Remove(addr);
+                try
+                {
+                    cbDisponiveis.Items.Remove(addr);
+                }
+                catch { }
             }));
         }
 
@@ -297,7 +305,8 @@ namespace BatalhaNaval_Visual
         /// <param name="t">Tiro recebido</param>
         private void Cliente_OnTiroRecebido(Tiro t)
         {
-            MessageBox.Show("Tiro recebido em " + t.X + " " + t.Y);
+            ResultadoDeTiro r = t.Aplicar(_tabuleiro);
+            MessageBox.Show("Tiro recebido em " + t.X + " " + t.Y + ", resultado: " + Enum.GetName(typeof(ResultadoDeTiro), r));
             _tirosRecebidos.Add(t);
         }
 
@@ -308,7 +317,7 @@ namespace BatalhaNaval_Visual
         /// <param name="resultado">Resultado do tiro</param>
         private void Cliente_OnResultadoDeTiro(Tiro t, ResultadoDeTiro resultado)
         {
-            MessageBox.Show("Resultado: " + resultado);
+            MessageBox.Show("Resultado: " + Enum.GetName(typeof(ResultadoDeTiro), resultado));
             _tirosDados.Add(t, resultado);
         }
 
@@ -327,12 +336,19 @@ namespace BatalhaNaval_Visual
         /// <param name="addr">Endereço do cliente desconectado</param>
         private void Cliente_OnClienteDesconectado(IPAddress addr)
         {
-            _tabuleiro = new Tabuleiro();
-            pbTabuleiro.Invalidate();
+            Invoke(new Action(() =>
+            {
+                _tabuleiro = new Tabuleiro();
+                pbTabuleiro.Invalidate();
 
-            pbInimigo.Visible = splitterTabuleiros.Visible = false;
+                pbInimigo.Visible = splitterTabuleiros.Visible = false;
 
-            tlpNavios.Visible = true;
+                tlpNavios.Visible = true;
+
+                foreach (TipoDeNavio t in (TipoDeNavio[])Enum.GetValues(typeof(TipoDeNavio)))
+                    GetPictureBoxParaTipoDeNavio(t).Visible = true;
+            }));
+
             _cliente = null;
         }
 
@@ -417,15 +433,16 @@ namespace BatalhaNaval_Visual
         {
             btnConectar.Enabled = false;
             
-            if (cbDisponiveis.SelectedIndex < 0)
+            /*if (cbDisponiveis.SelectedIndex < 0)
             {
                 btnConectar.Enabled = true;
                 return;
-            }
-            
-            IPAddress addr;
+            }*/
 
-            try
+            //IPAddress addr;
+            IPAddress addr = IPAddress.Parse("25.0.239.210");
+
+            /*try
             {
                 addr = (IPAddress)cbDisponiveis.SelectedItem;
             }
@@ -433,7 +450,7 @@ namespace BatalhaNaval_Visual
             {
                 MessageBox.Show(this, "Endereço inválido", "Batalha Naval", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
-            }
+            }*/
 
             Task.Run(() =>
             {
