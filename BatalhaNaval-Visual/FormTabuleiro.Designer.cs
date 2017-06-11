@@ -148,7 +148,6 @@
             // 
             // btnClear
             // 
-            this.btnClear.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnClear.Location = new System.Drawing.Point(3, 453);
             this.btnClear.Name = "btnClear";
             this.btnClear.Size = new System.Drawing.Size(258, 24);

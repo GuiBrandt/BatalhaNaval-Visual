@@ -17,8 +17,6 @@ namespace BatalhaNaval_Visual
         Bitmap _thumb = null;
         TipoDeNavio? _dragged = null;
         int _dir = 3;
-        Dictionary<Tiro, ResultadoDeTiro> _tirosDados;
-        List<Tiro> _tirosRecebidos;
 
         /// <summary>
         /// Construtor
@@ -28,8 +26,6 @@ namespace BatalhaNaval_Visual
             InitializeComponent();
 
             _tabuleiro = new Tabuleiro();
-            _tirosDados = new Dictionary<Tiro, ResultadoDeTiro>();
-            _tirosRecebidos = new List<Tiro>();
             pbTabuleiro.AllowDrop = true;
         }
 
@@ -63,34 +59,36 @@ namespace BatalhaNaval_Visual
         /// <returns>Uma imagem para o tipo de navio pedido</returns>
         private Image GetImagemParaTipoDeNavio(TipoDeNavio t, int d)
         {
-            Bitmap bmp = new Bitmap(GetPictureBoxParaTipoDeNavio(t).Image);
-
-            switch (d)
+            using (Bitmap bmp = new Bitmap(GetPictureBoxParaTipoDeNavio(t).Image))
             {
-                case 0:
-                    bmp.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                    break;
-                case 1:
-                    bmp.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                    break;
-                case 2:
-                    bmp.RotateFlip(RotateFlipType.Rotate270FlipNone);
-                    break;
-            }
 
-            Size size;
-            switch (d)
-            {
-                case 1:
-                case 3:
-                    size = new Size(pbTabuleiro.Width / 10 * t.Tamanho(), pbTabuleiro.Height / 10);
-                    break;
-                default:
-                    size = new Size(pbTabuleiro.Width / 10, pbTabuleiro.Height / 10 * t.Tamanho());
-                    break;
-            }
+                switch (d)
+                {
+                    case 0:
+                        bmp.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                        break;
+                    case 1:
+                        bmp.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                        break;
+                    case 2:
+                        bmp.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                        break;
+                }
 
-            return new Bitmap(bmp, size);
+                Size size;
+                switch (d)
+                {
+                    case 1:
+                    case 3:
+                        size = new Size(pbTabuleiro.Width / 10 * t.Tamanho(), pbTabuleiro.Height / 10);
+                        break;
+                    default:
+                        size = new Size(pbTabuleiro.Width / 10, pbTabuleiro.Height / 10 * t.Tamanho());
+                        break;
+                }
+
+                return new Bitmap(bmp, size);
+            }
         }
 
         /// <summary>
@@ -133,6 +131,21 @@ namespace BatalhaNaval_Visual
 
                 Image img = GetImagemParaTipoDeNavio(navio.Value, d);
                 g.DrawImage(img, pos);
+            }
+
+            using (Image hit = new Bitmap(Properties.Resources.acerto, new Size(pbInimigo.Width / 10, pbInimigo.Height / 10)))
+            using (Image miss = new Bitmap(Properties.Resources.agua, new Size(pbInimigo.Width / 10, pbInimigo.Height / 10)))
+            {
+                if (_cliente != null)
+                    foreach (Tiro tiro in _cliente.TirosRecebidos)
+                    {
+                        PointF pos = new PointF(tiro.X * pbInimigo.Width / 10, tiro.Y * pbInimigo.Height / 10);
+
+                        if (_cliente.TirosRecebidos.Resultado(tiro).HasFlag(ResultadoDeTiro.Acertou))
+                            e.Graphics.DrawImage(hit, pos);
+                        else
+                            e.Graphics.DrawImage(miss, pos);
+                    }
             }
         }
 
@@ -306,8 +319,21 @@ namespace BatalhaNaval_Visual
         private void Cliente_OnTiroRecebido(Tiro t)
         {
             ResultadoDeTiro r = t.Aplicar(_tabuleiro);
-            MessageBox.Show("Tiro recebido em " + t.X + " " + t.Y + ", resultado: " + Enum.GetName(typeof(ResultadoDeTiro), r));
-            _tirosRecebidos.Add(t);
+            Invoke(new Action(() =>
+            {
+                pbTabuleiro.Invalidate();
+
+                ResultadoDeTiro rs = _cliente.TirosRecebidos.Resultado(t);
+
+                if (rs.HasFlag(ResultadoDeTiro.Ganhou))
+                {
+                    MessageBox.Show(this, "Você perdeu", Text);
+                    _cliente.Close();
+                }
+
+                if (rs.HasFlag(ResultadoDeTiro.Afundou))
+                    MessageBox.Show(this, "Seu " + Enum.GetName(typeof(TipoDeNavio), rs.TipoDeNavio()) + " foi afundado");
+            }));
         }
 
         /// <summary>
@@ -317,8 +343,19 @@ namespace BatalhaNaval_Visual
         /// <param name="resultado">Resultado do tiro</param>
         private void Cliente_OnResultadoDeTiro(Tiro t, ResultadoDeTiro resultado)
         {
-            MessageBox.Show("Resultado: " + Enum.GetName(typeof(ResultadoDeTiro), resultado));
-            _tirosDados.Add(t, resultado);
+            Invoke(new Action(() =>
+            {
+                pbInimigo.Invalidate();
+
+                if (resultado.HasFlag(ResultadoDeTiro.Ganhou))
+                {
+                    MessageBox.Show(this, "Você ganhou!", Text);
+                    _cliente.Close();
+                }
+
+                if (resultado.HasFlag(ResultadoDeTiro.Afundou))
+                    MessageBox.Show(this, "Você afundou um " + Enum.GetName(typeof(TipoDeNavio), resultado.TipoDeNavio()) + " inimigo");
+            }));
         }
 
         /// <summary>
@@ -326,8 +363,11 @@ namespace BatalhaNaval_Visual
         /// </summary>
         private void Cliente_OnDarTiro()
         {
-            pbInimigo.Enabled = true;
-            timeout.Start();
+            Invoke(new Action(() =>
+            {
+                pbInimigo.Enabled = true;
+                timeout.Start();
+            }));
         }
 
         /// <summary>
@@ -553,28 +593,30 @@ namespace BatalhaNaval_Visual
         /// </summary>
         private void pbInimigo_Paint(object sender, PaintEventArgs e)
         {
-            Image cursor = new Bitmap(Properties.Resources.cursor, new Size(pbInimigo.Width / 10, pbInimigo.Height / 10));
-            Image hit = new Bitmap(Properties.Resources.acerto, new Size(pbInimigo.Width / 10, pbInimigo.Height / 10));
-            Image miss = new Bitmap(Properties.Resources.agua, new Size(pbInimigo.Width / 10, pbInimigo.Height / 10));
-            
-            foreach (KeyValuePair<Tiro, ResultadoDeTiro> pair in _tirosDados)
+            using (Image cursor = new Bitmap(Properties.Resources.cursor, new Size(pbInimigo.Width / 10, pbInimigo.Height / 10)))
+            using (Image hit = new Bitmap(Properties.Resources.acerto, new Size(pbInimigo.Width / 10, pbInimigo.Height / 10)))
+            using (Image miss = new Bitmap(Properties.Resources.agua, new Size(pbInimigo.Width / 10, pbInimigo.Height / 10)))
             {
-                PointF pos = new PointF(pair.Key.X * pbInimigo.Width / 10, pair.Key.Y * pbInimigo.Height / 10);
 
-                if (pair.Value.HasFlag(ResultadoDeTiro.Acertou))
-                    e.Graphics.DrawImage(hit, pos);
-                else
-                    e.Graphics.DrawImage(miss, pos);
+                foreach (Tiro tiro in _cliente.TirosDados)
+                {
+                    PointF pos = new PointF(tiro.X * pbInimigo.Width / 10, tiro.Y * pbInimigo.Height / 10);
+
+                    if (_cliente.TirosDados.Resultado(tiro).HasFlag(ResultadoDeTiro.Acertou))
+                        e.Graphics.DrawImage(hit, pos);
+                    else
+                        e.Graphics.DrawImage(miss, pos);
+                }
+
+                if (!pbInimigo.Enabled)
+                    return;
+
+                Point p = pbInimigo.PointToClient(Cursor.Position);
+                int x = p.X * _tabuleiro.NumeroDeColunas / pbInimigo.Width;
+                int y = p.Y * _tabuleiro.NumeroDeLinhas / pbInimigo.Height;
+
+                e.Graphics.DrawImage(cursor, new PointF(x * pbInimigo.Width / 10, y * pbInimigo.Height / 10));
             }
-
-            if (!pbInimigo.Enabled)
-                return; 
-
-            Point p = pbInimigo.PointToClient(Cursor.Position);
-            int x = p.X * _tabuleiro.NumeroDeColunas / pbInimigo.Width;
-            int y = p.Y * _tabuleiro.NumeroDeLinhas / pbInimigo.Height;
-
-            e.Graphics.DrawImage(cursor, new PointF(x * pbInimigo.Width / 10, y * pbInimigo.Height / 10));
         }
 
         /// <summary>
@@ -582,6 +624,7 @@ namespace BatalhaNaval_Visual
         /// </summary>
         private void timeout_Tick(object sender, EventArgs e)
         {
+            MessageBox.Show("Tempo limite esgotado");
             pbInimigo.Enabled = false;
         }
 
@@ -592,11 +635,12 @@ namespace BatalhaNaval_Visual
         {
             if (!pbInimigo.Enabled) return;
 
-            Point p = pbInimigo.PointToClient(new Point(e.X, e.Y));
+            Point p = new Point(e.X, e.Y);
             int x = p.X * _tabuleiro.NumeroDeColunas / pbInimigo.Width;
             int y = p.Y * _tabuleiro.NumeroDeLinhas / pbInimigo.Height;
 
             _cliente.DarTiro(x, y);
+            timeout.Stop();
             pbInimigo.Enabled = false;
         }
     }
