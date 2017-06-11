@@ -16,7 +16,7 @@ namespace BatalhaNaval_Visual
         IntPtr _cursor = IntPtr.Zero;
         Bitmap _thumb = null;
         TipoDeNavio? _dragged = null;
-        int _dir = 3;
+        Direcao _dir = Direcao.Direita;
 
         /// <summary>
         /// Construtor
@@ -57,38 +57,59 @@ namespace BatalhaNaval_Visual
         /// <param name="t">Tipo de navio</param>
         /// <param name="d">Direção do navio</param>
         /// <returns>Uma imagem para o tipo de navio pedido</returns>
-        private Image GetImagemParaTipoDeNavio(TipoDeNavio t, int d)
+        private Image GetImagemParaTipoDeNavio(TipoDeNavio t, Direcao d)
         {
-            using (Bitmap bmp = new Bitmap(GetPictureBoxParaTipoDeNavio(t).Image))
+            Bitmap bmp;
+
+            switch (t)
             {
+                case TipoDeNavio.Cruzador:
+                    bmp = Properties.Resources.cruzador;
+                    break;
 
-                switch (d)
-                {
-                    case 0:
-                        bmp.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                        break;
-                    case 1:
-                        bmp.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                        break;
-                    case 2:
-                        bmp.RotateFlip(RotateFlipType.Rotate270FlipNone);
-                        break;
-                }
+                case TipoDeNavio.Destroier:
+                    bmp = Properties.Resources.destroier;
+                    break;
 
-                Size size;
-                switch (d)
-                {
-                    case 1:
-                    case 3:
-                        size = new Size(pbTabuleiro.Width / 10 * t.Tamanho(), pbTabuleiro.Height / 10);
-                        break;
-                    default:
-                        size = new Size(pbTabuleiro.Width / 10, pbTabuleiro.Height / 10 * t.Tamanho());
-                        break;
-                }
+                case TipoDeNavio.Encouracado:
+                    bmp = Properties.Resources.encouracado;
+                    break;
 
-                return new Bitmap(bmp, size);
+                case TipoDeNavio.PortaAvioes:
+                    bmp = Properties.Resources.porta_avioes;
+                    break;
+
+                default:
+                    bmp = Properties.Resources.submarino;
+                    break;
             }
+
+            switch (d)
+            {
+                case Direcao.Baixo:
+                    bmp.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                    break;
+                case Direcao.Esquerda:
+                    bmp.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                    break;
+                case Direcao.Cima:
+                    bmp.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                    break;
+            }
+
+            Size size;
+            switch (d)
+            {
+                case Direcao.Esquerda:
+                case Direcao.Direita:
+                    size = new Size(pbTabuleiro.Width / 10 * t.Tamanho(), pbTabuleiro.Height / 10);
+                    break;
+                default:
+                    size = new Size(pbTabuleiro.Width / 10, pbTabuleiro.Height / 10 * t.Tamanho());
+                    break;
+            }
+
+            return new Bitmap(bmp, size);
         }
 
         /// <summary>
@@ -129,7 +150,7 @@ namespace BatalhaNaval_Visual
                         break;
                 }
 
-                Image img = GetImagemParaTipoDeNavio(navio.Value, d);
+                Image img = GetImagemParaTipoDeNavio(navio.Value, (Direcao)d);
                 g.DrawImage(img, pos);
             }
 
@@ -196,22 +217,22 @@ namespace BatalhaNaval_Visual
             tmp.xHotspot = 0;
             tmp.yHotspot = 0;
 
-            if (_dir == 1)
+            if (_dir == Direcao.Esquerda)
             {
                 tmp.xHotspot = _thumb.Width;
                 tmp.yHotspot = _thumb.Height / 2;
             }
-            else if (_dir == 2)
+            else if (_dir == Direcao.Cima)
             {
                 tmp.xHotspot = _thumb.Width / 2;
                 tmp.yHotspot = _thumb.Height;
             }
-            else if (_dir == 3)
+            else if (_dir == Direcao.Direita)
             {
                 tmp.xHotspot = 0;
                 tmp.yHotspot = _thumb.Height / 2;
             }
-            else if (_dir == 0)
+            else if (_dir == Direcao.Baixo)
             {
                 tmp.xHotspot = _thumb.Width / 2;
                 tmp.yHotspot = 0;
@@ -379,11 +400,14 @@ namespace BatalhaNaval_Visual
             Invoke(new Action(() =>
             {
                 _tabuleiro = new Tabuleiro();
-                pbTabuleiro.Invalidate();
+                pbTabuleiro.Invalidate();                
 
                 pbInimigo.Visible = splitterTabuleiros.Visible = false;
 
                 tlpNavios.Visible = true;
+
+                Height /= 2;
+                Width += tlpNavios.Width;
 
                 foreach (TipoDeNavio t in (TipoDeNavio[])Enum.GetValues(typeof(TipoDeNavio)))
                     GetPictureBoxParaTipoDeNavio(t).Visible = true;
@@ -401,6 +425,10 @@ namespace BatalhaNaval_Visual
             Invoke(new Action(() =>
             {
                 Width -= panelConectar.Width;
+
+                Height *= 2;
+                pbInimigo.Height = Height / 2;
+
                 panelConectar.Visible = false;
                 splitterRight.Visible = false;
                 splitterTabuleiros.Visible = true;
@@ -473,16 +501,15 @@ namespace BatalhaNaval_Visual
         {
             btnConectar.Enabled = false;
             
-            /*if (cbDisponiveis.SelectedIndex < 0)
+            if (cbDisponiveis.SelectedIndex < 0)
             {
                 btnConectar.Enabled = true;
                 return;
-            }*/
+            }
 
-            //IPAddress addr;
-            IPAddress addr = IPAddress.Parse("25.0.239.210");
+            IPAddress addr;
 
-            /*try
+            try
             {
                 addr = (IPAddress)cbDisponiveis.SelectedItem;
             }
@@ -490,7 +517,7 @@ namespace BatalhaNaval_Visual
             {
                 MessageBox.Show(this, "Endereço inválido", "Batalha Naval", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
-            }*/
+            }
 
             Task.Run(() =>
             {
@@ -515,39 +542,6 @@ namespace BatalhaNaval_Visual
                     }));
                 }
             });
-        }
-
-        /// <summary>
-        /// Evento de tecla pressionada
-        /// </summary>
-        private void pbTabuleiro_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
-        {
-            switch (e.KeyCode)
-            {
-                case Keys.Left:
-                    _dir = 1;
-                    break;
-
-                case Keys.Right:
-                    _dir = 3;
-                    break;
-
-                case Keys.Up:
-                    _dir = 2;
-                    break;
-
-                case Keys.Down:
-                    _dir = 0;
-                    break;
-            }
-
-            tlpNavios.Refresh();
-
-            if (_cursor == IntPtr.Zero || _thumb == null)
-                return;
-
-            CreateThumbnail(_dragged ?? TipoDeNavio.Submarino);
-            Cursor.Current = new Cursor(_cursor);
         }
 
         /// <summary>
@@ -642,6 +636,25 @@ namespace BatalhaNaval_Visual
             _cliente.DarTiro(x, y);
             timeout.Stop();
             pbInimigo.Enabled = false;
+        }
+
+        /// <summary>
+        /// Gira os navios
+        /// </summary>
+        private void btnGirar_Click(object sender, EventArgs e)
+        {
+            _dir = (Direcao)(((int)_dir + 1) % 4);
+
+            foreach (TipoDeNavio t in (TipoDeNavio[])Enum.GetValues(typeof(TipoDeNavio)))
+            {
+                PictureBox pb = GetPictureBoxParaTipoDeNavio(t);
+                pb.Image = GetImagemParaTipoDeNavio(t, _dir);
+
+                if ((int)_dir % 2 != 0)
+                    pb.SizeMode = PictureBoxSizeMode.CenterImage;
+                else
+                    pb.SizeMode = PictureBoxSizeMode.Zoom;
+            }
         }
     }
 }

@@ -37,6 +37,7 @@
             this.pbEncouracado = new System.Windows.Forms.PictureBox();
             this.pbPortaAvioes = new System.Windows.Forms.PictureBox();
             this.btnClear = new System.Windows.Forms.Button();
+            this.btnGirar = new System.Windows.Forms.Button();
             this.splitterLeft = new System.Windows.Forms.Splitter();
             this.panelConectar = new System.Windows.Forms.Panel();
             this.btnConectar = new System.Windows.Forms.Button();
@@ -68,15 +69,17 @@
             this.tlpNavios.Controls.Add(this.pbEncouracado, 0, 1);
             this.tlpNavios.Controls.Add(this.pbPortaAvioes, 0, 0);
             this.tlpNavios.Controls.Add(this.btnClear, 0, 5);
+            this.tlpNavios.Controls.Add(this.btnGirar, 0, 6);
             this.tlpNavios.Dock = System.Windows.Forms.DockStyle.Left;
             this.tlpNavios.Location = new System.Drawing.Point(0, 0);
             this.tlpNavios.Name = "tlpNavios";
-            this.tlpNavios.RowCount = 6;
+            this.tlpNavios.RowCount = 7;
             this.tlpNavios.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tlpNavios.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tlpNavios.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tlpNavios.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tlpNavios.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tlpNavios.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpNavios.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpNavios.Size = new System.Drawing.Size(264, 480);
             this.tlpNavios.TabIndex = 6;
@@ -85,9 +88,9 @@
             // 
             this.pbSubmarino.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pbSubmarino.Image = global::BatalhaNaval_Visual.Properties.Resources.submarino;
-            this.pbSubmarino.Location = new System.Drawing.Point(3, 363);
+            this.pbSubmarino.Location = new System.Drawing.Point(3, 339);
             this.pbSubmarino.Name = "pbSubmarino";
-            this.pbSubmarino.Size = new System.Drawing.Size(258, 84);
+            this.pbSubmarino.Size = new System.Drawing.Size(258, 78);
             this.pbSubmarino.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pbSubmarino.TabIndex = 4;
             this.pbSubmarino.TabStop = false;
@@ -98,9 +101,9 @@
             // 
             this.pbDestroier.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pbDestroier.Image = global::BatalhaNaval_Visual.Properties.Resources.destroier;
-            this.pbDestroier.Location = new System.Drawing.Point(3, 273);
+            this.pbDestroier.Location = new System.Drawing.Point(3, 255);
             this.pbDestroier.Name = "pbDestroier";
-            this.pbDestroier.Size = new System.Drawing.Size(258, 84);
+            this.pbDestroier.Size = new System.Drawing.Size(258, 78);
             this.pbDestroier.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pbDestroier.TabIndex = 3;
             this.pbDestroier.TabStop = false;
@@ -111,9 +114,9 @@
             // 
             this.pbCruzador.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pbCruzador.Image = global::BatalhaNaval_Visual.Properties.Resources.cruzador;
-            this.pbCruzador.Location = new System.Drawing.Point(3, 183);
+            this.pbCruzador.Location = new System.Drawing.Point(3, 171);
             this.pbCruzador.Name = "pbCruzador";
-            this.pbCruzador.Size = new System.Drawing.Size(258, 84);
+            this.pbCruzador.Size = new System.Drawing.Size(258, 78);
             this.pbCruzador.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pbCruzador.TabIndex = 2;
             this.pbCruzador.TabStop = false;
@@ -124,9 +127,9 @@
             // 
             this.pbEncouracado.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pbEncouracado.Image = global::BatalhaNaval_Visual.Properties.Resources.encouracado;
-            this.pbEncouracado.Location = new System.Drawing.Point(3, 93);
+            this.pbEncouracado.Location = new System.Drawing.Point(3, 87);
             this.pbEncouracado.Name = "pbEncouracado";
-            this.pbEncouracado.Size = new System.Drawing.Size(258, 84);
+            this.pbEncouracado.Size = new System.Drawing.Size(258, 78);
             this.pbEncouracado.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pbEncouracado.TabIndex = 1;
             this.pbEncouracado.TabStop = false;
@@ -139,7 +142,7 @@
             this.pbPortaAvioes.Image = ((System.Drawing.Image)(resources.GetObject("pbPortaAvioes.Image")));
             this.pbPortaAvioes.Location = new System.Drawing.Point(3, 3);
             this.pbPortaAvioes.Name = "pbPortaAvioes";
-            this.pbPortaAvioes.Size = new System.Drawing.Size(258, 84);
+            this.pbPortaAvioes.Size = new System.Drawing.Size(258, 78);
             this.pbPortaAvioes.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pbPortaAvioes.TabIndex = 0;
             this.pbPortaAvioes.TabStop = false;
@@ -148,13 +151,24 @@
             // 
             // btnClear
             // 
-            this.btnClear.Location = new System.Drawing.Point(3, 453);
+            this.btnClear.Location = new System.Drawing.Point(3, 423);
             this.btnClear.Name = "btnClear";
             this.btnClear.Size = new System.Drawing.Size(258, 24);
             this.btnClear.TabIndex = 5;
             this.btnClear.Text = "Limpar Tabuleiro";
             this.btnClear.UseVisualStyleBackColor = true;
             this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
+            // 
+            // btnGirar
+            // 
+            this.btnGirar.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnGirar.Location = new System.Drawing.Point(3, 453);
+            this.btnGirar.Name = "btnGirar";
+            this.btnGirar.Size = new System.Drawing.Size(258, 24);
+            this.btnGirar.TabIndex = 6;
+            this.btnGirar.Text = "Girar Navios";
+            this.btnGirar.UseVisualStyleBackColor = true;
+            this.btnGirar.Click += new System.EventHandler(this.btnGirar_Click);
             // 
             // splitterLeft
             // 
@@ -279,7 +293,6 @@
             this.Text = "Batalha Naval";
             this.GiveFeedback += new System.Windows.Forms.GiveFeedbackEventHandler(this.Form_GiveFeedback);
             this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Form_MouseUp);
-            this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.pbTabuleiro_PreviewKeyDown);
             this.tlpNavios.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pbSubmarino)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbDestroier)).EndInit();
@@ -313,6 +326,7 @@
         private System.Windows.Forms.Splitter splitterTabuleiros;
         private System.Windows.Forms.Button btnClear;
         private System.Windows.Forms.Timer timeout;
+        private System.Windows.Forms.Button btnGirar;
     }
 }
 
